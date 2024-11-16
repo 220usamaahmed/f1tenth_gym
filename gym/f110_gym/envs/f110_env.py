@@ -161,7 +161,7 @@ class F110Env(gym.Env):
         try:
             self.lidar_params = kwargs["lidar_params"]
         except:
-            self.params = {
+            self.lidar_params = {
                 "num_beams": 1080,
                 "fov": 4.7,
             }
