@@ -48,7 +48,6 @@ class RaceCar(object):
 
     Data Members:
         params (dict): vehicle parameters dictionary
-        lidar_params (dict): lidar scanner paramter dictionary
         is_ego (bool): ego identifier
         time_step (float): physics timestep
         num_beams (int): number of beams in laser
