@@ -74,6 +74,7 @@ class RaceCar(object):
         time_step=0.01,
         num_beams=1080,
         fov=4.7,
+        max_range=30,
         integrator=Integrator.Euler,
     ):
         """
@@ -85,6 +86,7 @@ class RaceCar(object):
             time_step (float, default=0.01): physics sim time step
             num_beams (int, default=1080): number of beams in the laser scan
             fov (float, default=4.7): field of view of the laser
+            max_range (float, default=30.0): max range of LIDAR beams
 
         Returns:
             None
@@ -126,7 +128,9 @@ class RaceCar(object):
         # initialize scan sim
         if RaceCar.scan_simulator is None:
             self.scan_rng = np.random.default_rng(seed=self.seed)
-            RaceCar.scan_simulator = ScanSimulator2D(num_beams, fov)
+            RaceCar.scan_simulator = ScanSimulator2D(
+                num_beams, fov, max_range=max_range
+            )
 
             scan_ang_incr = RaceCar.scan_simulator.get_increment()
 
@@ -515,7 +519,7 @@ class Simulator(object):
 
         Args:
             params (dict): vehicle parameter dictionary, includes {'mu', 'C_Sf', 'C_Sr', 'lf', 'lr', 'h', 'm', 'I', 's_min', 's_max', 'sv_min', 'sv_max', 'v_switch', 'a_max', 'v_min', 'v_max', 'length', 'width'}
-            lidar_params (dict): lidar scanner paramter dictionary, includes {'num_beams', 'fov'}
+            lidar_params (dict): lidar scanner paramter dictionary, includes {'num_beams', 'fov', 'max_range'}
             num_agents (int): number of agents in the environment
             seed (int): seed of the rng in scan simulation
             time_step (float, default=0.01): physics time step
@@ -544,6 +548,7 @@ class Simulator(object):
                     is_ego=True,
                     num_beams=self.lidar_params["num_beams"],
                     fov=self.lidar_params["fov"],
+                    max_range=self.lidar_params["max_range"],
                     time_step=self.time_step,
                     integrator=integrator,
                 )
@@ -555,6 +560,7 @@ class Simulator(object):
                     is_ego=False,
                     num_beams=self.lidar_params["num_beams"],
                     fov=self.lidar_params["fov"],
+                    max_range=self.lidar_params["max_range"],
                     time_step=self.time_step,
                     integrator=integrator,
                 )

@@ -88,6 +88,7 @@ class F110Env(gym.Env):
             lidar_params (dict, default={'num_beams': 1080, 'fov': 4.7}):
                 num_beams: number of beams in the scan
                 fov: field of view of the laser scan
+                max_range: max range of LIDAR beams
 
             num_agents (int, default=2): number of agents in the environment
             timestep (float, default=0.01): physics timestep
@@ -134,37 +135,34 @@ class F110Env(gym.Env):
         except:
             self.map_ext = ".png"
 
-        try:
-            self.params = kwargs["params"]
-        except:
-            self.params = {
-                "mu": 1.0489,
-                "C_Sf": 4.718,
-                "C_Sr": 5.4562,
-                "lf": 0.15875,
-                "lr": 0.17145,
-                "h": 0.074,
-                "m": 3.74,
-                "I": 0.04712,
-                "s_min": -0.4189,
-                "s_max": 0.4189,
-                "sv_min": -3.2,
-                "sv_max": 3.2,
-                "v_switch": 7.319,
-                "a_max": 9.51,
-                "v_min": -5.0,
-                "v_max": 20.0,
-                "width": 0.31,
-                "length": 0.58,
-            }
+        self.params = {
+            "mu": 1.0489,
+            "C_Sf": 4.718,
+            "C_Sr": 5.4562,
+            "lf": 0.15875,
+            "lr": 0.17145,
+            "h": 0.074,
+            "m": 3.74,
+            "I": 0.04712,
+            "s_min": -0.4189,
+            "s_max": 0.4189,
+            "sv_min": -3.2,
+            "sv_max": 3.2,
+            "v_switch": 7.319,
+            "a_max": 9.51,
+            "v_min": -5.0,
+            "v_max": 20.0,
+            "width": 0.31,
+            "length": 0.58,
+        }
+        if "params" in kwargs:
+            for key, value in kwargs["params"].items():
+                self.params[key] = value
 
-        try:
-            self.lidar_params = kwargs["lidar_params"]
-        except:
-            self.lidar_params = {
-                "num_beams": 1080,
-                "fov": 4.7,
-            }
+        self.lidar_params = {"num_beams": 1080, "fov": 4.7, "max_range": 30.0}
+        if "lidar_params" in kwargs:
+            for key, value in kwargs["lidar_params"].items():
+                self.lidar_params[key] = value
 
         # simulation parameters
         try:
