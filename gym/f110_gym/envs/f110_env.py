@@ -95,7 +95,7 @@ class F110Env(gym.Env):
             ego_idx (int, default=0): ego's index in list of agents
     """
 
-    metadata = {"render.modes": ["human", "human_fast"]}
+    metadata = {"render.modes": ["human", "human_slow", "human_fast"]}
 
     # rendering
     renderer = None
@@ -443,7 +443,7 @@ class F110Env(gym.Env):
         Returns:
             None
         """
-        assert mode in ["human", "human_fast"]
+        assert mode in ["human", "human_slow", "human_fast"]
 
         if F110Env.renderer is None:
             # first call, initialize everything
@@ -462,5 +462,7 @@ class F110Env(gym.Env):
         F110Env.renderer.flip()
         if mode == "human":
             time.sleep(0.005)
+        elif mode == "human_slow":
+            time.sleep(0.01)
         elif mode == "human_fast":
             pass
