@@ -48,8 +48,8 @@ from pyglet import gl
 # rendering
 VIDEO_W = 600
 VIDEO_H = 400
-WINDOW_W = 1000
-WINDOW_H = 800
+WINDOW_W = 640
+WINDOW_H = 480
 
 
 class F110Env(gym.Env):
@@ -451,6 +451,7 @@ class F110Env(gym.Env):
 
             F110Env.renderer = EnvRenderer(WINDOW_W, WINDOW_H)
             F110Env.renderer.update_map(self.map_name, self.map_ext)
+            F110Env.renderer.set_location(0, 0)
 
         F110Env.renderer.update_obs(self.render_obs)
 
