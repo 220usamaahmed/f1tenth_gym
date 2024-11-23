@@ -100,11 +100,11 @@ class EnvRenderer(pyglet.window.Window):
             "Lap Time: {laptime:.2f}, Ego Lap Count: {count:.0f}".format(
                 laptime=0.0, count=0.0
             ),
-            font_size=36,
+            font_size=12,
             x=0,
-            y=-800,
-            anchor_x="center",
-            anchor_y="center",
+            y=-self.width,
+            anchor_x="right",
+            anchor_y="bottom",
             # width=0.01,
             # height=0.01,
             color=(255, 255, 255, 255),
@@ -371,6 +371,8 @@ class EnvRenderer(pyglet.window.Window):
             self.cars[j].vertices = vertices
         self.poses = poses
 
+        self.score_label.x = self.right - 20
+        self.score_label.y = self.bottom + 20
         self.score_label.text = (
             "Lap Time: {laptime:.2f}, Ego Lap Count: {count:.0f}".format(
                 laptime=obs["lap_times"][0], count=obs["lap_counts"][obs["ego_idx"]]
