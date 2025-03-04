@@ -89,6 +89,9 @@ class EnvRenderer(pyglet.window.Window):
         # current env map
         self.map_points = None
 
+        # current env map point vertices
+        self.map_points_vertex_list = []
+
         # current env agent poses, (num_agents, 3), columns are (x, y, theta)
         self.poses = None
 
@@ -162,14 +165,20 @@ class EnvRenderer(pyglet.window.Window):
         map_mask = map_img == 0.0
         map_mask_flat = map_mask.flatten()
         map_points = 50.0 * map_coords[:, map_mask_flat].T
+
+        for vlist in self.map_points_vertex_list:
+            vlist.delete()
+        self.map_points_vertex_list = []
+
         for i in range(map_points.shape[0]):
-            self.batch.add(
+            points = self.batch.add(
                 1,
                 GL_POINTS,
                 None,
                 ("v3f/stream", [map_points[i, 0], map_points[i, 1], map_points[i, 2]]),
                 ("c3B/stream", [183, 193, 222]),
             )
+            self.map_points_vertex_list.append(points)
         self.map_points = map_points
 
     def on_resize(self, width, height):
