@@ -92,6 +92,11 @@ class EnvRenderer(pyglet.window.Window):
         # current env map point vertices
         self.map_points_vertex_list = []
 
+        # map image for rendering
+        self.map_origin_x = 0
+        self.map_origin_y = 0
+        self.pyglet_image = None
+
         # current env agent poses, (num_agents, 3), columns are (x, y, theta)
         self.poses = None
 
@@ -146,9 +151,9 @@ class EnvRenderer(pyglet.window.Window):
                 print(ex)
 
         # load map image
-        map_img = np.array(
-            Image.open(map_path + map_ext).transpose(Image.FLIP_TOP_BOTTOM)
-        ).astype(np.float64)
+        img = Image.open(map_path + map_ext).transpose(Image.FLIP_TOP_BOTTOM)
+
+        map_img = np.array(img).astype(np.float64)
         map_height = map_img.shape[0]
         map_width = map_img.shape[1]
 
@@ -161,6 +166,20 @@ class EnvRenderer(pyglet.window.Window):
         map_z = np.zeros(map_y.shape)
         map_coords = np.vstack((map_x, map_y, map_z))
 
+        map_bg_width = int(map_width * map_resolution * 50)
+        map_bg_height = int(map_height * map_resolution * 50)
+        rgba_img = img.convert("RGBA").resize((map_bg_width, map_bg_height))
+        image_data = rgba_img.tobytes()
+
+        self.pyglet_image = pyglet.image.ImageData(
+            map_bg_width,
+            map_bg_height,
+            "RGBA",
+            image_data,
+        )
+        self.map_origin_x = origin_x * 50
+        self.map_origin_y = origin_y * 50
+
         # mask and only leave the obstacle points
         map_mask = map_img == 0.0
         map_mask_flat = map_mask.flatten()
@@ -170,15 +189,15 @@ class EnvRenderer(pyglet.window.Window):
             vlist.delete()
         self.map_points_vertex_list = []
 
-        for i in range(map_points.shape[0]):
-            points = self.batch.add(
-                1,
-                GL_POINTS,
-                None,
-                ("v3f/stream", [map_points[i, 0], map_points[i, 1], map_points[i, 2]]),
-                ("c3B/stream", [183, 193, 222]),
-            )
-            self.map_points_vertex_list.append(points)
+        # for i in range(map_points.shape[0]):
+        #     points = self.batch.add(
+        #         1,
+        #         GL_POINTS,
+        #         None,
+        #         ("v3f/stream", [map_points[i, 0], map_points[i, 1], map_points[i, 2]]),
+        #         ("c3B/stream", [183, 193, 222]),
+        #     )
+        #     self.map_points_vertex_list.append(points)
         self.map_points = map_points
 
     def on_resize(self, width, height):
@@ -318,6 +337,7 @@ class EnvRenderer(pyglet.window.Window):
         glOrtho(self.left, self.right, self.bottom, self.top, 1, -1)
 
         # Draw all batches
+        self.pyglet_image.blit(self.map_origin_x, self.map_origin_y)
         self.batch.draw()
         self.fps_display.draw()
         # Remove default modelview matrix
