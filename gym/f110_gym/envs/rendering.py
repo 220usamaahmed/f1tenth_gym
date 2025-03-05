@@ -52,7 +52,7 @@ class EnvRenderer(pyglet.window.Window):
     A window class inherited from pyglet.window.Window, handles the camera/projection interaction, resizing window, and rendering the environment
     """
 
-    def __init__(self, width, height, *args, **kwargs):
+    def __init__(self, width, height, car_length=None, car_width=None, *args, **kwargs):
         """
         Class constructor
 
@@ -71,8 +71,15 @@ class EnvRenderer(pyglet.window.Window):
         self.width = width
         self.height = height
 
+        self.car_length = car_length if car_length else CAR_LENGTH
+        self.car_width = car_width if car_width else CAR_WIDTH
+
         # gl init
-        glClearColor(9 / 255, 32 / 255, 87 / 255, 1.0)
+        # glClearColor(9 / 255, 32 / 255, 87 / 255, 1.0)
+        glClearColor(0.5, 0.5, 0.5, 1.0)
+
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
         # initialize camera values
         self.left = -width / 2
@@ -365,7 +372,7 @@ class EnvRenderer(pyglet.window.Window):
             for i in range(num_agents):
                 if i == self.ego_idx:
                     vertices_np = get_vertices(
-                        np.array([0.0, 0.0, 0.0]), CAR_LENGTH, CAR_WIDTH
+                        np.array([0.0, 0.0, 0.0]), self.car_length, self.car_width
                     )
                     vertices = list(vertices_np.flatten())
                     car = self.batch.add(
@@ -381,7 +388,7 @@ class EnvRenderer(pyglet.window.Window):
                     self.cars.append(car)
                 else:
                     vertices_np = get_vertices(
-                        np.array([0.0, 0.0, 0.0]), CAR_LENGTH, CAR_WIDTH
+                        np.array([0.0, 0.0, 0.0]), self.car_length, self.car_width
                     )
                     vertices = list(vertices_np.flatten())
                     car = self.batch.add(
@@ -395,7 +402,9 @@ class EnvRenderer(pyglet.window.Window):
 
         poses = np.stack((poses_x, poses_y, poses_theta)).T
         for j in range(poses.shape[0]):
-            vertices_np = 50.0 * get_vertices(poses[j, :], CAR_LENGTH, CAR_WIDTH)
+            vertices_np = 50.0 * get_vertices(
+                poses[j, :], self.car_length, self.car_width
+            )
             vertices = list(vertices_np.flatten())
             self.cars[j].vertices = vertices
         self.poses = poses

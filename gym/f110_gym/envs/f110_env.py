@@ -394,7 +394,6 @@ class F110Env(gym.Env):
         }
 
         if F110Env.renderer is not None:
-            print(self.map_name)
             F110Env.renderer.update_map(self.map_name, self.map_ext)
 
         return obs, reward, done, info
@@ -453,7 +452,12 @@ class F110Env(gym.Env):
             # first call, initialize everything
             from f110_gym.envs.rendering import EnvRenderer
 
-            F110Env.renderer = EnvRenderer(WINDOW_W, WINDOW_H)
+            F110Env.renderer = EnvRenderer(
+                WINDOW_W,
+                WINDOW_H,
+                car_width=self.params["width"],
+                car_length=self.params["length"],
+            )
             F110Env.renderer.update_map(self.map_name, self.map_ext)
             F110Env.renderer.set_location(0, 0)
 
