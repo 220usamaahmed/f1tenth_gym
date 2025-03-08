@@ -247,6 +247,7 @@ class F110Env(gym.Env):
         Returns:
             done (bool): whether the rollout is done
             toggle_list (list[int]): each agent's toggle list for crossing the finish zone
+            u_turned (bool): whether ego performed a u-turn and crossed finish line from the wrong side
         """
 
         # this is assuming 2 agents
@@ -257,6 +258,7 @@ class F110Env(gym.Env):
         poses_x = np.array(self.poses_x) - self.start_xs
         poses_y = np.array(self.poses_y) - self.start_ys
         delta_pt = np.dot(self.start_rot, np.stack((poses_x, poses_y), axis=0))
+
         temp_y = delta_pt[1, :]
         idx1 = temp_y > left_t
         idx2 = temp_y < -right_t
@@ -279,7 +281,19 @@ class F110Env(gym.Env):
 
         done = (self.collisions[self.ego_idx]) or np.all(self.toggle_list >= 2)
 
-        return bool(done), self.toggle_list >= 2
+        u_turned = False
+
+        if done:
+            start_theta = self.start_thetas[self.ego_idx]
+            theta = self.poses_theta[self.ego_idx]
+            dot_product = np.dot(np.array(np.cos(start_theta), np.sin(start_theta)), np.array(np.cos(theta), np.sin(theta)))
+
+            u_turned = dot_product < 0
+
+        checkpoint_done = self.toggle_list >= 2
+        checkpoint_done[self.ego_idx] = checkpoint_done[self.ego_idx] and not u_turned
+
+        return bool(done), checkpoint_done, u_turned
 
     def _update_state(self, obs_dict):
         """
@@ -334,8 +348,8 @@ class F110Env(gym.Env):
         self._update_state(obs)
 
         # check done
-        done, toggle_list = self._check_done()
-        info = {"checkpoint_done": toggle_list}
+        done, toggle_list, u_turned = self._check_done()
+        info = {"checkpoint_done": toggle_list, "u_turned": u_turned}
 
         return obs, reward, done, info
 
